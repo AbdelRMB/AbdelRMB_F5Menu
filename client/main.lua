@@ -1,3 +1,10 @@
+--		  █████╗ ██████╗ ██████╗ ███████╗██╗     ██████╗ ███╗   ███╗██████╗
+--		 ██╔══██╗██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗████╗ ████║██╔══██╗
+--		 ███████║██████╔╝██║  ██║█████╗  ██║     ██████╔╝██╔████╔██║██████╔╝
+--		 ██╔══██║██╔══██╗██║  ██║██╔══╝  ██║     ██╔══██╗██║╚██╔╝██║██╔══██╗
+--		 ██║  ██║██████╔╝██████╔╝███████╗███████╗██║  ██║██║ ╚═╝ ██║██████╔╝
+--		 ╚═╝  ╚═╝╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝
+
 ESX = exports["es_extended"]:getSharedObject()
 
 local playerId = GetPlayerServerId(PlayerId())
@@ -27,19 +34,36 @@ function fetchPlayerInfo(callback)
     end)
 end
 
+function fetchPlayerBills(callback)
+    ESX.TriggerServerCallback('f5menu:getPlayerBills', function(billsData)
+        bills = billsData or {}
+        if callback then callback() end
+    end)
+end
+
 
 exports['AbdelRMBUI']:CreateMenu("F5", "mainMenu", "")
 exports['AbdelRMBUI']:CreateMenu("F5", "playerInfo", "Informations du Joueur", "mainMenu")
 exports['AbdelRMBUI']:CreateMenu("F5", "playerMoney", "Portefeuille du Joueur", "mainMenu")
+exports['AbdelRMBUI']:CreateMenu("F5", "playerBills", "Factures", "mainMenu")
 
 exports['AbdelRMBUI']:AddMenuItem("F5_mainMenu", "Informations", function()
     fetchPlayerInfo()
+    updatePlayerInfoMenu()
     exports['AbdelRMBUI']:OpenMenu("F5", "playerInfo")
 end)
 
 exports['AbdelRMBUI']:AddMenuItem("F5_mainMenu", "Portefeuille", function()
     fetchPlayerInfo()
+    updatePlayerMoneyMenu()
     exports['AbdelRMBUI']:OpenMenu("F5", "playerMoney")
+end)
+
+exports['AbdelRMBUI']:AddMenuItem("F5_mainMenu", "Factures", function()
+    fetchPlayerBills(function()
+        updatePlayerBillsMenu()
+        exports['AbdelRMBUI']:OpenMenu("F5", "playerBills")
+    end)
 end)
 
 exports['AbdelRMBUI']:AddMenuItem("F5_mainMenu", "Quitter le menu", function()
@@ -66,6 +90,30 @@ function updatePlayerMoneyMenu()
     end)
 end
 
+
+function updatePlayerBillsMenu()
+    exports['AbdelRMBUI']:ClearMenu("F5_playerBills")
+
+    if #bills > 0 then
+        for _, bill in ipairs(bills) do
+            local label = bill.label .. " - $" .. bill.amount
+            exports['AbdelRMBUI']:AddMenuItem("F5_playerBills", label, function()
+                TriggerServerEvent('f5menu:payBill', bill.id, bill.amount, bill.target)
+                fetchPlayerBills(updatePlayerBillsMenu)
+                exports['AbdelRMBUI']:CloseMenu("F5", "playerBills")
+            end)
+        end
+    else
+        exports['AbdelRMBUI']:AddMenuItem("F5_playerBills", "Aucune facture disponible.")
+    end
+
+    exports['AbdelRMBUI']:AddMenuItem("F5_playerBills", "Retour au Menu Principal", function()
+        exports['AbdelRMBUI']:OpenMenu("F5", "mainMenu")
+    end)
+end
+
+
+
 function openF5Menu()
     fetchPlayerInfo(function()
         updatePlayerInfoMenu()
@@ -77,7 +125,7 @@ end
 Citizen.CreateThread(function()
     while true do
         Wait(0)
-        if IsControlJustPressed(1, 166) then -- Touche F5
+        if IsControlJustPressed(1, 166) then
             openF5Menu()
         end
     end
