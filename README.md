@@ -34,6 +34,6 @@ This menu relies on the following libraries:
 Before using the menu, import the required libraries in your client script:
 
 ```lua
-local AbdelUI = exports['AbdelRMBUI']
-local Notify = exports['AbdelRMB-Notify']
+local AbdelRMBUI = exports['AbdelRMBUI']
+local AbdelRMBNotify = exports['AbdelRMB-Notify']
 ```
