@@ -67,10 +67,6 @@ AbdelRMBUI.Button("F5_mainMenu", "Factures", function()
     end)
 end)
 
-AbdelRMBUI.Button("F5_mainMenu", "Quitter le menu", function()
-    AbdelRMBUI.CloseMenu("F5", "mainMenu")
-end)
-
 function updatePlayerInfoMenu()
     AbdelRMBUI.ClearMenu("F5_playerInfo")
     AbdelRMBUI.Button("F5_playerInfo", "Nom: " .. playerName)
